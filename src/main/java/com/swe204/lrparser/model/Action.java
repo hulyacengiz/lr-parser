@@ -31,8 +31,12 @@ public class Action {
 
     @Override
     public String toString() {
-        if (type.equals("acc")) return "accept";
-        if (type.equals("err")) return "-";
-        return type + value;
+        return switch (type) {
+            case "s" -> "Shift " + value;
+            case "r" -> "Reduce " + value;
+            case "acc" -> "Accept";
+            case "err" -> "Error";
+            default -> "Unknown";
+        };
     }
 }
