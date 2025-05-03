@@ -28,24 +28,33 @@ public class Main {
             Map<Integer, Map<String, Action>> actionTable = tableLoader.loadActionTable();
             Map<Integer, Map<String, Integer>> gotoTable = tableLoader.loadGotoTable();
 
-            // Step 2: Read input tokens from file (e.g., input/input1.txt)
-            InputReaderService inputReader = new InputReaderService();
-            List<String> tokens = inputReader.readTokens("input3.txt");
-
-            // Step 3: Initialize the parser with the loaded tables
+            // Step 2: Prepare input reader and parser
             LRParserService parser = new LRParserService(grammarRules, actionTable, gotoTable);
+            InputReaderService inputReader = new InputReaderService();
 
-            // Step 4: Define output file to write parser trace and parse tree
-            PrintWriter writer = new PrintWriter("src/main/resources/output/output3.txt");
+            // Step 3: Loop through all input files (input1.txt → input9.txt)
+            for (int i = 1; i <= 9; i++) {
+                String inputFileName = "input" + i + ".txt";
+                String outputPath = "src/main/resources/output/output" + i + ".txt";
 
-            // Step 5: Start parsing and write output
-            parser.parse(tokens, writer);
-            writer.close();
+                List<String> tokens = inputReader.readTokens(inputFileName);
 
-            System.out.println("Parsing completed successfully. Output written to output/output3.txt");
+                if (tokens.isEmpty()) {
+                    System.err.printf("Input file %s is empty or missing. Skipping.%n", inputFileName);
+                    continue;
+                }
+
+                try (PrintWriter writer = new PrintWriter(outputPath)) {
+                    parser.parse(tokens, writer);
+                }
+
+                System.out.printf("Parsed %s → %s%n", inputFileName, outputPath);
+            }
+
+            System.out.println("All input files have been processed successfully.");
 
         } catch (Exception e) {
-            e.printStackTrace(); // Print any unexpected errors
+            e.printStackTrace(); // Show any unexpected error
         }
     }
 }
