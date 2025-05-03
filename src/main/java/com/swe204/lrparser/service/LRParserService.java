@@ -116,12 +116,10 @@ public class LRParserService {
                     if (!parseStack.isEmpty()) {
                         parseStack.peek().printEachNodePath(writer); // Print full parse tree paths
                     }
-                    writer.println("ACCEPTED");
                     return;
                 }
                 default -> { // Error
                     printStep(stateStack, symbolStack, tokens.subList(position, tokens.size()), action, writer);
-                    writer.println("ERROR");
                     return;
                 }
             }
