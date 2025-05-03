@@ -1,0 +1,1 @@
+# This folder is created in order to make output file visible in GitHub
