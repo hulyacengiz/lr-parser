@@ -6,6 +6,7 @@ import com.swe204.lrparser.model.GrammarRule;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.ArrayList;
 
 public class LRParserService {
 
@@ -26,6 +27,7 @@ public class LRParserService {
     public void parse(List<String> tokens) {
         Stack<Integer> stateStack = new Stack<>();
         Stack<String> symbolStack = new Stack<>();
+        Stack<ParseTreeNode> parseStack = new Stack<>();
         stateStack.push(0); // start state
 
         int position = 0;
@@ -39,21 +41,22 @@ public class LRParserService {
             Action action = actionTable.get(currentState).getOrDefault(currentToken, new Action("err", -1));
 
             switch (action.getType()) {
-                case "s":
+                case "s" -> {
                     symbolStack.push(currentToken);
                     stateStack.push(action.getValue());
-
+                    parseStack.push(new ParseTreeNode(currentToken));
                     printStep(stateStack, symbolStack, tokens.subList(position, tokens.size()), action);
                     position++;
-                    break;
-
-                case "r":
+                }
+                case "r" -> {
                     GrammarRule rule = grammarRules.get(action.getValue() - 1);
                     int rhsLength = rule.getRightHandSide().length;
 
+                    List<ParseTreeNode> children = new ArrayList<>();
                     for (int i = 0; i < rhsLength; i++) {
                         symbolStack.pop();
                         stateStack.pop();
+                        children.add(0, parseStack.pop());
                     }
 
                     String lhs = rule.getLeftHandSide();
@@ -61,6 +64,12 @@ public class LRParserService {
                     symbolStack.push(lhs);
                     int gotoState = gotoTable.get(fromState).get(lhs);
                     stateStack.push(gotoState);
+
+                    ParseTreeNode parent = new ParseTreeNode(lhs);
+                    for (ParseTreeNode child : children) {
+                        parent.addChild(child);
+                    }
+                    parseStack.push(parent);
 
                     Action reduceAction = new Action("r", rule.getRuleNumber()) {
                         @Override
@@ -70,16 +79,16 @@ public class LRParserService {
                     };
 
                     printStep(stateStack, symbolStack, tokens.subList(position, tokens.size()), reduceAction);
-                    break;
-
-                case "acc":
+                }
+                case "acc" -> {
+                    System.out.println("--------------------------------------------------------------------------------------------------------");
+                    System.out.println("Parse tree:");
+                    if (!parseStack.isEmpty()) {
+                        parseStack.peek().printEachNodePath();
+                    }
                     System.out.println("ACCEPTED");
                     return;
-
-                default:
-                    printStep(stateStack, symbolStack, tokens.subList(position, tokens.size()), action);
-                    System.out.println("ERROR");
-                    return;
+                }
             }
         }
     }

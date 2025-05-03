@@ -17,7 +17,7 @@ public class Main {
         Map<Integer, Map<String, Integer>> gotoTable = loader.loadGotoTable();
 
         InputReaderService inputReader = new InputReaderService();
-        List<String> input = inputReader.readTokens("input1.txt");
+        List<String> input = inputReader.readTokens("input2.txt");
 
         LRParserService parser = new LRParserService(grammar, actionTable, gotoTable);
         parser.parse(input);
